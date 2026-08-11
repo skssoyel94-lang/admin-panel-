@@ -1,0 +1,6 @@
+{
+  "name": "sMovie Admin",
+  "description": "sMovie Admin platform for managing movie and TV show content, notifications, and media streaming.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

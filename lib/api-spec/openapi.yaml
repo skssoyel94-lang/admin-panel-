@@ -1,0 +1,397 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Shared sMovie API specification for Admin and Streaming App
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: library
+    description: Media library management and streaming content
+  - name: publish
+    description: Content publishing
+  - name: notifications
+    description: System notifications and alerts
+  - name: meta
+    description: App version and metadata
+
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /library:
+    get:
+      operationId: getLibrary
+      tags: [library]
+      summary: List library items
+      description: Returns all published movies, series, and episodes in the central library
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: contentType
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [all, movie, series]
+        - name: query
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of library items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LibraryItem"
+    post:
+      operationId: createLibraryItem
+      tags: [library]
+      summary: Create or update library item
+      description: Creates or updates a movie/series item in the central store
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LibraryItem"
+      responses:
+        "200":
+          description: Item saved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LibraryItem"
+
+  /library/{id}:
+    get:
+      operationId: getLibraryItemById
+      tags: [library]
+      summary: Get library item by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Library item details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LibraryItem"
+        "404":
+          description: Item not found
+    put:
+      operationId: updateLibraryItem
+      tags: [library]
+      summary: Update library item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LibraryItem"
+      responses:
+        "200":
+          description: Updated item
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LibraryItem"
+    delete:
+      operationId: deleteLibraryItem
+      tags: [library]
+      summary: Delete library item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Item deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  id:
+                    type: string
+
+  /publish:
+    post:
+      operationId: publishItem
+      tags: [publish]
+      summary: Publish media item from Admin
+      description: Endpoint for admin panel to publish content to central database
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LibraryItem"
+      responses:
+        "200":
+          description: Published item
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  item:
+                    $ref: "#/components/schemas/LibraryItem"
+
+  /categories:
+    get:
+      operationId: getCategories
+      tags: [library]
+      summary: Get list of categories
+      responses:
+        "200":
+          description: List of available categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /notifications:
+    get:
+      operationId: getNotifications
+      tags: [notifications]
+      summary: Get list of notifications
+      responses:
+        "200":
+          description: List of notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/NotificationItem"
+    post:
+      operationId: createNotification
+      tags: [notifications]
+      summary: Post a notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationItem"
+      responses:
+        "200":
+          description: Created notification
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationItem"
+
+  /version:
+    get:
+      operationId: getAppVersion
+      tags: [meta]
+      summary: Get OTA app version
+      responses:
+        "200":
+          description: Active app version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionInfo"
+    post:
+      operationId: bumpAppVersion
+      tags: [meta]
+      summary: Bump app version
+      responses:
+        "200":
+          description: Updated version
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VersionInfo"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    VersionInfo:
+      type: object
+      properties:
+        version:
+          type: string
+        updatedAt:
+          type: number
+      required:
+        - version
+
+    EpisodeItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        epNo:
+          type: string
+        airDate:
+          type: string
+        videoUrl:
+          type: string
+        videoFileName:
+          type: string
+        subtitles:
+          type: array
+          items:
+            type: string
+
+    SeasonItem:
+      type: object
+      properties:
+        seasonNo:
+          type: number
+        name:
+          type: string
+        episodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/EpisodeItem"
+
+    LibraryItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        year:
+          type: string
+        contentType:
+          type: string
+        media_type:
+          type: string
+        language:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+        nav_chips:
+          type: array
+          items:
+            type: string
+        tmdb_id:
+          type: string
+        poster_url:
+          type: string
+        poster_paths:
+          type: array
+          items:
+            type: string
+        backdrop_url:
+          type: string
+        backdrop_paths:
+          type: array
+          items:
+            type: string
+        logo_paths:
+          type: array
+          items:
+            type: string
+        video_url:
+          type: string
+        teaser_url:
+          type: string
+        quality:
+          type: string
+        audio:
+          type: array
+          items:
+            type: string
+        subtitles:
+          type: array
+          items:
+            type: string
+        overview:
+          type: string
+        rating:
+          type: number
+        vote_average:
+          type: number
+        seasons:
+          type: array
+          items:
+            $ref: "#/components/schemas/SeasonItem"
+        owner:
+          type: string
+        api_key:
+          type: string
+        status:
+          type: string
+        addedAt:
+          type: number
+        updatedAt:
+          type: number
+      required:
+        - id
+        - title
+
+    NotificationItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        item_id:
+          type: string
+        poster_url:
+          type: string
+        timestamp:
+          type: number
+      required:
+        - id
+        - title

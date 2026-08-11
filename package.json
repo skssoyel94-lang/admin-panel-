@@ -1,0 +1,33 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "dev": "npm run dev --workspace=artifacts/smovie-admin",
+    "build": "npm run typecheck && npm run build --workspaces --if-present",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "npm run typecheck:libs && npm run typecheck --workspaces --if-present",
+    "postinstall": "node scripts/patch-cors.cjs"
+  },
+  "private": true,
+  "dependencies": {
+    "@replit/connectors-sdk": "^0.4.1",
+    "expo": "^57.0.11",
+    "expo-updates": "^57.0.12",
+    "jszip": "^3.10.1",
+    "lucide-react": "^1.31.0",
+    "mediainfo.js": "^0.3.7",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.6",
+    "typescript": "~5.7.0"
+  },
+  "workspaces": [
+    "artifacts/*",
+    "lib/*",
+    "scripts"
+  ]
+}
